@@ -1,6 +1,7 @@
 use clap::Clap;
 use std::fs::File;
 use std::io::{BufReader, BufRead, stdin};
+
 mod rpn_calculator;
 
 #[derive(Clap, Debug)]
