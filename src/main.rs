@@ -1,6 +1,7 @@
 use clap::Clap;
 use std::fs::File;
 use std::io::{BufReader, BufRead, stdin};
+mod rpn_calculator;
 
 #[derive(Clap, Debug)]
 #[clap(
@@ -15,52 +16,6 @@ struct Opts {
 
     #[clap(name = "FILE")]
     formula_file: Option<String>,
-}
-
-struct RpnCalculator(bool);
-
-impl RpnCalculator {
-    fn new(verbose: bool) -> Self {
-        Self(verbose)
-    }
-
-    fn eval(&self, formula: &str) -> i32 {
-        let mut tokens = formula.split_whitespace().rev().collect::<Vec<_>>();
-        self.eval_inner(&mut tokens)
-    }
-
-    fn eval_inner(&self, tokens: &mut Vec<&str>) -> i32 {
-        let mut stack = Vec::new();
-
-        while let Some(token) = tokens.pop() {
-            if let Ok(x) = token.parse::<i32>() {
-                stack.push(x);
-            } else {
-                let y = stack.pop().expect("invalid syntax");
-                let x = stack.pop().expect("invalid syntax");
-
-                let res = match token {
-                    "+" => x + y,
-                    "-" => x - y,
-                    "*" => x * y,
-                    "/" => x / y,
-                    "%" => x % y,
-                    _ => panic!("invalid token"),
-                };
-                stack.push(res);
-            }
-
-            if self.0 {
-                println!("{:?} {:?}", tokens, stack);
-            }
-        };
-
-        if stack.len() == 1 {
-            stack[0]
-        } else {
-            panic!("invalid syntax")
-        }
-    }
 }
 
 fn main() {
@@ -79,7 +34,7 @@ fn main() {
 }
 
 fn run<R: BufRead>(reader: R, verbose: bool) {
-    let calc = RpnCalculator(verbose);
+    let calc = rpn_calculator::RpnCalculator::new(verbose);
 
     for line in reader.lines() {
         let line = line.unwrap();
