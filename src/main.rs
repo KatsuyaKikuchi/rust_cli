@@ -1,6 +1,7 @@
 use clap::Clap;
 use std::fs::File;
 use std::io::{BufReader, BufRead, stdin};
+use anyhow::{Result};
 
 mod rpn_calculator;
 
@@ -34,12 +35,17 @@ fn main() {
     }
 }
 
-fn run<R: BufRead>(reader: R, verbose: bool) {
+fn run<R: BufRead>(reader: R, verbose: bool) -> Result<()> {
     let calc = rpn_calculator::RpnCalculator::new(verbose);
 
     for line in reader.lines() {
         let line = line.unwrap();
-        let answer = calc.eval(&line);
-        println!("{}", answer);
+
+        match calc.eval(&line) {
+            Ok(ans) => println!("{}", ans),
+            Err(e) => eprintln!("{:#?}", e),
+        }
     }
+
+    Ok(())
 }
